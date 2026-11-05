@@ -1,0 +1,19 @@
+{
+  "source": "User-provided Pico serial output, 2026-11-05",
+  "sample_rate_hz": 200000,
+  "chirp_start_hz": 30000,
+  "chirp_end_hz": 50000,
+  "reference_samples": 500,
+  "expected_delay_samples": 300,
+  "setup_ms": 4.797,
+  "repeats": 5,
+  "samples": [1000, 2000, 4000, 8000],
+  "direct_ms": [15.194, 27.397, 51.796, 100.596],
+  "fft_512_ms": [40.581, 81.094, 162.115, 324.144],
+  "fft_1024_ms": [2.375, 4.587, 8.951, 17.734],
+  "fft_2048_ms": [3.121, 6.091, 9.202, 18.281],
+  "fft_512_max_error": 0.00015,
+  "fft_1024_max_error": 0.00014,
+  "fft_2048_max_error": 0.00014,
+  "all_fft_peak_checks_pass": true
+}

@@ -19,6 +19,7 @@
         },
         {
             "label": "Run Project",
+            "dependsOn": "Compile Project",
             "type": "process",
             "command": "${env:HOME}/.pico-sdk/picotool/2.3.1/picotool/picotool",
             "args": [
