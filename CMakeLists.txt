@@ -41,7 +41,7 @@ add_subdirectory(external/CMSIS-DSP)
 # Only build the DSP source groups this project needs. Building the whole
 # library makes GCC 15.2 crash in arm_abs_q31, a function we do not use.
 get_target_property(dsp_sources CMSISDSP SOURCES)
-list(FILTER dsp_sources INCLUDE REGEX "(TransformFunctions/.*(f32)\\.c|TransformFunctions/arm_bitreversal[2]?\\.c|CommonTables/.*\\.c|FilteringFunctions/arm_correlate_f32\\.c|SupportFunctions/arm_(copy|fill)_.*\\.c)$")
+list(FILTER dsp_sources INCLUDE REGEX "(TransformFunctions/.*(f32)\\.c|TransformFunctions/arm_bitreversal[2]?\\.c|CommonTables/.*\\.c|FilteringFunctions/arm_fir(_init)?_f32\\.c|SupportFunctions/arm_(copy|fill)_.*\\.c)$")
 set_property(TARGET CMSISDSP PROPERTY SOURCES "${dsp_sources}")
 
 add_library(correlation STATIC src/correlation.c)
@@ -49,7 +49,9 @@ target_include_directories(correlation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includ
 target_link_libraries(correlation PUBLIC CMSISDSP)
 
 add_executable(ultrasonic src/main.c src/acquisition.c)
-add_executable(ultrasonic_benchmark benchmarks/benchmark.c)
+add_executable(ultrasonic_benchmark benchmarks/benchmark.c benchmarks/signals.c)
+target_include_directories(ultrasonic_benchmark PRIVATE benchmarks)
+target_link_libraries(ultrasonic_benchmark PRIVATE hardware_clocks)
 foreach(target ultrasonic ultrasonic_benchmark)
     target_link_libraries(${target} PRIVATE correlation pico_stdlib)
     pico_set_program_name(${target} "${target}")

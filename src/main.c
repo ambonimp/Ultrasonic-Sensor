@@ -3,15 +3,26 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 
-static correlation_context_t correlator;
+static correlation_fir_context_t correlator;
+
+// Provisional settings for DC-removed voltage recordings, NOT calibrated
+// live-sensor settings. Set min_lag from the capture's transmit timestamp and
+// measured ringing. A zero here deliberately assumes no timing reference.
+static const correlation_echo_options_t echo_options = {
+    .min_lag_samples = 0,
+    .max_lag_samples = SIZE_MAX,
+    .peak_radius_samples = AUSTINS_PEAK_RADIUS_SAMPLES,
+    .min_normalized_match = AUSTINS_MIN_NORMALIZED_MATCH,
+    .min_window_rms = AUSTINS_MIN_WINDOW_RMS_V,
+};
 
 int main(void) {
     stdio_init_all();
     acquisition_buffer_t reference;
     bool ready = acquisition_init(&reference);
     if (ready) {
-        ready = correlation_init(&correlator, reference.samples, reference.count,
-                                 ULTRASONIC_MIN_PEAK_STRENGTH);
+        ready = correlation_fir_init(&correlator, reference.samples, reference.count,
+                                 ULTRASONIC_SAMPLE_RATE_HZ, ULTRASONIC_MIN_PEAK_STRENGTH);
         acquisition_release(&reference);
     }
     while (true) {
@@ -25,7 +36,8 @@ int main(void) {
             sleep_ms(1);
             continue;
         }
-        correlation_result_t echo = correlation_process(&correlator, capture.samples, capture.count);
+        correlation_result_t echo = correlation_fir_process_first_echo(
+            &correlator, capture.samples, capture.count, &echo_options);
         acquisition_release(&capture);
         printf("delay=%lu samples (%.6f s), peak=%.5f, valid=%s\n",
                (unsigned long)echo.delay_samples, echo.delay_seconds,
